@@ -9,7 +9,7 @@ function submitData() {
     
     for(let i=0; i<interestsDOM.length; i++){
         interest += interestsDOM[i].value;
-        if(i < interest.length-1){
+         if(i < interest.length-1){
             interest += ",";
         }
     
