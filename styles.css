@@ -15,7 +15,6 @@ body {
     padding: 20px;
     box-sizing: border-box;
 }
-
 .header {
     font-size: 30px;
     text-align: center;
@@ -54,4 +53,5 @@ input.form, textarea {
     .button {
        width: 100%;
     }
+
 }
