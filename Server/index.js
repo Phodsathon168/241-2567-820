@@ -2,8 +2,12 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
 const mysql = require('mysql2/promise');
+const cors = require('cors');
+
 app.use(bodyParser.json());
+app.use(cors());
 const port = 8000;
+
 let users = []
 let conn = null
 
@@ -66,61 +70,80 @@ app.get('/users', async (req,res) => {
 
 // path = POST / User
 app.post('/users', async (req,res) => {
-    let user = req.body;
-    const results = await conn.query('INSERT INTO users SET ?', user)
-    console.log('results', results)
-    res.json({
-        message: 'User created',
-        data: results[0]
-    });
+    try {
+        let user = req.body;
+        const results = await conn.query('INSERT INTO users SET ?', user)
+        console.log('results',results)
+        res.json({
+            message: 'User created',
+            data: results[0]
+        })
+    } catch (error){
+        console.error('errorMessage',error.Message)
+        res.status(500).json({
+            message: 'something went wrong',
+            errorMessage: error.message
+        })
+    }
+})
+// path = GET / user/:id get user
+app.get('/user/:id', async (req,res) => {
+    try {
+    let id = req.params.id;
+    const results = await conn.query('SELECT * FROM users WHERE id = ?', id)
+    if (results[0].length == 0){
+        throw {status: 404, message: 'User not found'}
+        }
+        res.json(results[0][0])
+    } catch (error){
+        console.error('errorMessage',error.Message)
+        let statusCode = error.status || 500
+        res.status(statusCode).json({
+            message: 'something went wrong',
+            errorMessage: error.message
+        })
+    }    
 })
 
-// path = PUT / user/:id
-app.put('/user/:id', (req,res) => {
-    let id = req.params.id;
-    let updateUser = req.body;
-    // find users from id request
-    let selectedIndex = users.findIndex(user => user.id == id)
-    // update user 
-    if (updateUser.firstname){
-        users[selectedIndex].firstname = updateUser.firstname
+// path = PUT / users/:id
+app.put('/user/:id', async(req,res) => {
+    try {
+        let id = req.params.id;
+        let updateUser = req.body;
+        const results = await conn.query(
+            'UPDATE users SET ? WHERE id = ?', 
+            [updateUser, id]
+        )
+        res.json({
+            message: 'Update User created',
+            data: results[0]
+        })
+    } catch (error){
+        console.error('errorMessage',error.Message)
+        res.status(500).json({
+            message: 'something went wrong',
+            errorMessage: error.message
+        })
     }
-    if (updateUser.lastname){
-        users[selectedIndex].lastname = updateUser.lastname
-    }
-
-    users[selectedIndex].firstname = updateUser.firstname || users[selectedIndex].firstname
-    users[selectedIndex].lastname = updateUser.lastname || users[selectedIndex].lastname
-
-    res.json({
-        message: 'User updated successfully',
-        data: {
-            user: updateUser,
-            indexUpdate: selectedIndex
-        }
-    });
-    // sent user info in update to where it belongs
-    /* 
-    GET / USERS = get all users
-    POST / USERS = create new user in data
-    GET /users/:id = get user by id
-    PUT /users/:id = get user by id
-    */
- })
+})
 
 // Path = DELETE / user/:id
-app.delete('/user/:id', (req,res) => {
-    let id = req.params.id;
-    // find index of user
-    let selectedIndex = users.findIndex(user => user.id == id)
-    
-    users.splice(selectedIndex,1)
-    delete users[selectedIndex]
-    res.json({
-        message: 'Delete Completed',
-        indexDelete: selectedIndex
-    });
-});
+app.delete('/user/:id', async(req,res) => {
+    try {
+        let id = req.params.id;
+        const results = await conn.query('DELETE From users SET ? WHERE id = ?', id)
+        res.json({
+            message: 'Delete User Completed',
+            data: results[0]
+        })
+    } catch (error){
+        console.error('errorMessage',error.Message)
+        res.status(500).json({
+            message: 'something went wrong',
+            errorMessage: error.message
+        })
+    }
+})
 
 app.listen(port, async (req,res) => {
   await initMySQL()
