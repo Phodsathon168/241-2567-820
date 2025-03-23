@@ -41,7 +41,7 @@ const loadData = async() => {
           <td>${users.interests || '-'}</td>
           <td>${users.description || '-'}</td>
           <td>
-          <a href="index1.html?id=${users.id}"><button class='Edit'>Edit</button></a>
+          <a href="section(edit).html?id=${users.id}"><button class='Edit'>Edit</button></a>
           <button class="delete" data-id="${users.id}">Delete</button>
           </td>
       </tr>
