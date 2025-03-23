@@ -1,0 +1,11 @@
+docker -v 
+docker ps
+docker ps --all or docker ps -a 
+docker run hello-world
+docker rm container_id
+docker run -p 80:80 nginx
+docker run -p 80:80 nginx
+docker stop container_id
+docker rm container_id
+
+docker exec -it
